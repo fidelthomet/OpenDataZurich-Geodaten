@@ -1,9 +1,16 @@
-// Beispielanwendung basierend auf offenen Geodaten der Stadt Zürich. http://data.stadt-zuerich.ch
+// Beispielanwendung: 
 
-// WMTS Daten der Stadt Zürich basieren auf dem Schweizer Koordinatensystem LV03, was der Projektion EPSG:21781 entspricht.
-// Zur korrekten Darstellung der Geodaten, muss diese Projektion defineirt werden. Siehe: http://epsg.io/21781
+// Einbindung von offenen Geodaten der Stadt Zürich (http://data.stadt-zuerich.ch) unter Verwendung von Open Layers 3 (http://openlayers.org/). Siehe dazu auch die Tutorials von Open Layers 3 (http://openlayers.org/en/v3.12.0/doc/tutorials/).
+
+// Die WMTS Dienste der Stadt Zürich basieren zur Zeit auf dem Schweizer Koordinatensystem LV03, was der Projektion EPSG:21781 entspricht. Mehr dazu finden Sie unter: http://www.epsg.org/
+// Zur korrekten Darstellung der Geodaten, muss diese Projektion definiert werden. Mit der Library proj4.js ist das ganz einfach möglich. 
+// Die notwendigen Angaben und zu definierenden Parameter finden Sie unter: http://epsg.io/21781 unter Export > Proj4js.
+
 proj4.defs("EPSG:21781", "+proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +k_0=1 +x_0=600000 +y_0=200000 +ellps=bessel +towgs84=674.4,15.1,405.3,0,0,0,0 +units=m +no_defs");
 
+// ---
+// SCHRITT 1: Karten-Container einrichten
+// ---
 // Nachfolgender Code wird ausgeführt, sobald die Webseite vollständig geladen ist.
 $(document).ready(function() {
 
@@ -27,10 +34,14 @@ $(document).ready(function() {
 		}),
 	});
 
+
+	// ---
+	// SCHRITT 2: WMTS einbetten
+	// ---
 	// Die Hintergrundkarte wird per WMTS eingebunden. Dafür müssen dessen Eigenschaften (WMTS-Capabilities) geladen werden.
 	// $.get(...) führt einen HTTP-Request auf die angegebene Ressource aus. 
-	// Wichtig: Die Seite der Stadt Zürich unterstütz kein CORS (https://de.wikipedia.org/wiki/Cross-Origin_Resource_Sharing).
-	// Daher muss die Ressource über einen CORS-Proxy wie http://api.flaneur.io/cors/ geladen werden.
+	// Wichtig: Die Seite der Stadt Zürich unterstützt kein CORS (https://de.wikipedia.org/wiki/Cross-Origin_Resource_Sharing).
+	// Daher muss die Ressource über einen CORS-Proxy - am Besten über http://api.flaneur.io/cors/ - geladen werden.
 	$.get("http://api.flaneur.io/cors/http://www.gis.stadt-zuerich.ch/wmts/wmts-zh-stzh-ogd.xml").success(function(data) {
 
 		// Sobald die Capabilities erfolgreich geladen wurden, wird der folgende Code ausgeführt.
@@ -39,7 +50,9 @@ $(document).ready(function() {
 
 		// Um die gewünschte Kartenebene zu laden muss die Datenquelle (source) definiert werden. Diese lässt sich mit den eingelesenen Capabilities erstellen. 
 		// Angegeben werden muss zusätzlich die gewünschte Kartenebene (layer) und das requestEncoding, für die Karten der Stadt Zürich ist das "REST"
-		// Für andere Kartenebenen muss ein anderer "Identifier" angegeben werden. z.B: Stadtplan, Stadtplan_1793, UebersichtsplanAktuell, Luftbild_2011, Luftbild_1976
+		// Für andere Kartenebenen muss ein anderer "Identifier" angegeben werden.
+		// Entfernen Sie für eine Auflistung der verfügbaren Kartenebenen, die zwei Schrägstriche zu Beginn der folgenden Zeile.
+		// var layers = ""; capabilities.Contents.Layer.forEach(function(layer){layers += layer.Identifier+"\n"}); alert(layers)
 		var source = ol.source.WMTS.optionsFromCapabilities(capabilities, {
 			layer: "Stadtplan_1900",
 			requestEncoding: "REST"
@@ -53,6 +66,9 @@ $(document).ready(function() {
 		// Dann wird die Ebene der Karte hinzugefügt. Damit ist der WMTS fertig eingebunden und die Karte ist nutzbar.
 		map.addLayer(layer)
 
+		// ---
+		// SCHRITT 3: GeoJSON einbetten
+		// ---
 		// Für die Positionen der Denkmalschutzobjekte wird die entsprechende GeoJSON-Datei vom Open Data Katalog geladen.
 		// Auch dafür wird der CORS-Proxy benötigt.
 		$.get("http://api.flaneur.io/cors/https://data.stadt-zuerich.ch/storage/f/denkmalschutzobjekt/denkmalschutzobjekt.json").success(function(data) {
@@ -70,6 +86,7 @@ $(document).ready(function() {
 			// Bei Vektordaten lässt sich definieren, wie die Geodaten dargestellt werden sollen.
 			var style = new ol.style.Style({
 				// Die Positionen der Denkmalschutzobjekte sollen auf der Karte als violetter Punkt mit einem Radius von 2 Pixeln dargestellt werden.
+				// Weitere Möglichkeiten für das Styling können Sie der OpenLayers Dokumentation entnehmen: http://openlayers.org/en/master/apidoc/ol.style.Style.html
 				image: new ol.style.Circle({
 					fill: new ol.style.Fill({
 						color: '#A100FF',
