@@ -12,4 +12,4 @@ Definiert das Aussehen (Grösse und Position) der Karte
 ### map.js
 Erstellt einen Container zum anzeigen der Karte und bindet die Hintergrundkarte per WMTS und die Denkmalschutzobjekte als GeoJSON ein.
 ### libs
-Beinhaltet die Benötigten Libraries ([OpenLayers 3](http://openlayers.org/) und [Proj4js](http://proj4js.org/)), sowie das Stylesheet von OpenLayers.
+Beinhaltet die Benötigten Libraries ([OpenLayers 3](http://openlayers.org/), [jQuery](http://jquery.org/) und [Proj4js](http://proj4js.org/)), sowie das Stylesheet von OpenLayers.
